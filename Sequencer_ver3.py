@@ -15,7 +15,7 @@ def flag_scanned_variables(df, var_list):
     return flags
 
 # Parameters (normally from your dataframe)
-meas_num = 6
+meas_num = 5
 date = '2025-06-13'
 
 # let's identify all unique times.
@@ -61,17 +61,8 @@ try:
             elif status == "missing":
                 print(f"❌ {var} is missing in df.")
 except NameError:
-    print('Reset to default')
-    Ryd401ZS_time = 0.005
-    Ryd401ZS_SP = 0.2
-    PID411_SP = 120
-    OnOffTwduringRydbergTweezers = 1
-    IonizationPulseDuration = 0.005
-    ImagingLight_wavelength = 583
-    FieldIonize = 1
-    DoTweezer583LACs = 1
-    LACs583_time = 30
-    MOT_loadtime = 100
+    print('no df')
+
 # 
 # Conditionally show P label
 if flags["Ryd401ZS_SP"] == "scan":
@@ -88,30 +79,30 @@ else:
 # Step data
 # somehow for now I can't put the value into the else loop, so it always prints it, even if a parameter was scanned
 steps = [
-    dict(name="Tweezers", start=0, duration=time_1, group="Prep", label=f"MOT load for {MOT_loadtime} ms", order=1),
-    dict(name="LAC", start=time_2, duration=(time_1-time_2), group="Control", label=f"t={LACs583_time} ms", order=2),
+    dict(name="Tweezers", start=0, duration=time_1, group="Prep", label=f"MOT load for {MOT_loadtime} ms", order=6),
+    dict(name="LAC", start=time_2, duration=(time_1-time_2), group="Control", label=f"t={LACs583_time} ms", order=5),
     dict(name="ZS 401", start=time_1, duration=(time_3-time_1), group="Manipulation",
-        label=f"{sp_label}, {time_label}", order=3),
+        label=f"{sp_label}, {time_label}", order=4),
     dict(name="411", start=time_1, duration=(time_3-time_1), group="Manipulation", 
          label=(f"P={PID411_SP} mW, "
                 "EOM ↯ (scanned); "
                 if flags['M2_EOM_freq'] == "scan"
-                else f"P={PID411_SP} mW, "), order=4),
+                else f"P={PID411_SP} mW, "), order=3),
 ]
 
 
 if ImagingLight_wavelength == 1:
-    steps.append(dict(name="Imaging (401)", start=time_4, duration=(time_5-time_4), group="Readout", label="pulsed", order=6))
+    steps.append(dict(name="Imaging (401)", start=time_4, duration=(time_5-time_4), group="Readout", label="pulsed", order=1))
 elif ImagingLight_wavelength == 2:
-    steps.append(dict(name="Imaging (583)", start=time_4, duration=(time_5-time_4), group="Readout", label="XX ms", order=6))
+    steps.append(dict(name="Imaging (583)", start=time_4, duration=(time_5-time_4), group="Readout", label="XX ms", order=1))
 
 if OnOffTwduringRydbergTweezers == 0:
-    steps.append(dict(name="Tweezers", start=time_1, duration=(time_5-time_1), group="Prep", label="", order=1))
+    steps.append(dict(name="Tweezers", start=time_1, duration=(time_5-time_1), group="Prep", label="", order=6))
 else:
-    steps.append(dict(name="Tweezers", start=time_3, duration=(time_5-time_3), group="Prep", label="Recapture", order=1))
+    steps.append(dict(name="Tweezers", start=time_3, duration=(time_5-time_3), group="Prep", label="Recapture", order=6))
 
 if FieldIonize == 1:
-    steps.append(dict(name="HV", start=time_3, duration=(time_4-time_3), group="Optional", label=f"1400 Vpp, t={IonizationPulseDuration*1e3:.1f} µs", order=5))
+    steps.append(dict(name="HV", start=time_3, duration=(time_4-time_3), group="Optional", label=f"1400 Vpp, t={IonizationPulseDuration*1e3:.1f} µs", order=2))
 
 # Colors
 colors = {
@@ -159,11 +150,11 @@ ax.set_yticklabels(reversed(y_labels))
 ax.set_xlabel("Time (ms)")
 ax.set_title(f"Experiment date {date}, meas {meas_num}")
 ax.invert_yaxis()
-ax.set_xlim(0, 40)
+ax.set_xlim(0, 35)
 
 # Legend
 legend_patches = [mpatches.Patch(color=clr, label=grp) for grp, clr in colors.items()]
-ax.legend(handles=legend_patches, loc='upper left')
+ax.legend(handles=legend_patches, loc='lower left')
 
 plt.tight_layout()
 
