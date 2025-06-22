@@ -18,6 +18,13 @@ def flag_scanned_variables(df, var_list):
 meas_num = 6
 date = '2025-06-13'
 
+# let's identify all unique times.
+time_1 = 15 #end of mot end LAC, begininning of loss
+time_2 = 10 # start of LAC
+time_3 = time_1 + 10 # end of loss
+time_4 = time_3 + 7 # additional pulse
+time_5 = time_4 + 3 # Imaging
+
 # the next try-and-catch is in order to be able to work with preset values, not from the main computer
 try:
     df, name = get_df(date.split('-'), meas_num)
@@ -47,20 +54,9 @@ try:
             if status == "scan":
                 print(f"🔄 {var} is being scanned: {df[var].unique()}")
             elif status == "constant":
-                print(f"✔️ {var} is constant.")
+                print()# print(f"✔️ {var} is constant.")
             elif status == "missing":
                 print(f"❌ {var} is missing in df.")
-    if 1==0:
-        print(f"Ryd401ZS_time = {Ryd401ZS_time} ({type(Ryd401ZS_time)})")
-        print(f"Ryd401ZS_SP = {Ryd401ZS_SP} ({type(Ryd401ZS_SP)})")
-        print(f"PID411_SP = {PID411_SP} ({type(PID411_SP)})")
-        print(f"OnOffTwduringRydbergTweezers = {OnOffTwduringRydbergTweezers} ({type(OnOffTwduringRydbergTweezers)})")
-        print(f"IonizationPulseDuration = {IonizationPulseDuration} ({type(IonizationPulseDuration)})")
-        print(f"FieldIonize = {FieldIonize} ({type(FieldIonize)})")
-        print(f"DoTweezer583LACs = {DoTweezer583LACs} ({type(DoTweezer583LACs)})")
-        print(f"LACs583_time = {LACs583_time} ({type(LACs583_time)})")
-        print(f"MOT_loadtime = {MOT_loadtime} ({type(MOT_loadtime)})")
-        print(f"ImagingLight_wavelength = {ImagingLight_wavelength} ({type(ImagingLight_wavelength)})")
 except NameError:
     print('Reset to default')
     Ryd401ZS_time = 0.005
@@ -89,13 +85,11 @@ else:
 # Step data
 # somehow for now I can't put the value into the else loop, so it always prints it, even if a parameter was scanned
 steps = [
-    dict(name="Tweezers", start=0, duration=20, group="Prep", label=f"MOT load for {MOT_loadtime} ms"),
-    dict(name="LAC", start=10, duration=10, group="Control", label=f"t={LACs583_time} ms"),
-    dict(name="ZS 401", start=20, duration=10, group="Manipulation",
+    dict(name="Tweezers", start=0, duration=time_1, group="Prep", label=f"MOT load for {MOT_loadtime} ms"),
+    dict(name="LAC", start=time_2, duration=(time_1-time_2), group="Control", label=f"t={LACs583_time} ms"),
+    dict(name="ZS 401", start=time_1, duration=(time_3-time_1), group="Manipulation",
         label=f"{sp_label}, {time_label}"),
-#    dict(name="411", start=20, duration=10, group="Manipulation", 
-#         label=f"P={PID411_SP} mW"),
-    dict(name="411", start=20, duration=10, group="Manipulation", 
+    dict(name="411", start=time_1, duration=(time_3-time_1), group="Manipulation", 
          label=(f"P={PID411_SP} mW, "
                 "EOM ↯ (scanned); "
                 if flags['M2_EOM_freq'] == "scan"
@@ -104,17 +98,17 @@ steps = [
 
 
 if ImagingLight_wavelength == 1:
-    steps.append(dict(name="Imaging (401)", start=35.005, duration=5, group="Readout", label="pulsed"))
+    steps.append(dict(name="Imaging (401)", start=time_4, duration=(time_5-time_4), group="Readout", label="pulsed"))
 elif ImagingLight_wavelength == 2:
-    steps.append(dict(name="Imaging (583)", start=35.005, duration=5, group="Readout", label="XX ms"))
+    steps.append(dict(name="Imaging (583)", start=time_4, duration=(time_5-time_4), group="Readout", label="XX ms"))
 
 if OnOffTwduringRydbergTweezers == 0:
-    steps.append(dict(name="Tweezers", start=20, duration=20, group="Prep", label=""))
+    steps.append(dict(name="Tweezers", start=time_1, duration=(time_5-time_1), group="Prep", label=""))
 else:
-    steps.append(dict(name="Tweezers", start=30, duration=10, group="Prep", label="Recapture"))
+    steps.append(dict(name="Tweezers", start=time_3, duration=(time_5-time_3), group="Prep", label="Recapture"))
 
 if FieldIonize == 1:
-    steps.append(dict(name="HV", start=30, duration=7, group="Optional", label=f"1400 Vpp, t={IonizationPulseDuration*1e3:.1f} µs"))
+    steps.append(dict(name="HV", start=time_3, duration=(time_4-time_3), group="Optional", label=f"1400 Vpp, t={IonizationPulseDuration*1e3:.1f} µs"))
 
 # Colors
 colors = {
