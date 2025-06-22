@@ -34,9 +34,6 @@ try:
     "IonizationPulseDuration", "FieldIonize", "DoTweezer583LACs",
     "LACs583_time", "MOT_loadtime", "ImagingLight_wavelength", "M2_EOM_freq" 
     ]
-
-    # flags = flag_scanned_variables(df, used_vars)
-    #var = lambda v: df[v][1] if v in df.columns else None
     # blocks of parameters
     # Rydberg
     Ryd401ZS_time = df['Ryd401ZS_time'][1]
@@ -88,30 +85,30 @@ else:
 # Step data
 # somehow for now I can't put the value into the else loop, so it always prints it, even if a parameter was scanned
 steps = [
-    dict(name="Tweezers", start=0, duration=time_1, group="Prep", label=f"MOT load for {MOT_loadtime} ms", order=1),
-    dict(name="LAC", start=time_2, duration=(time_1-time_2), group="Control", label=f"t={LACs583_time} ms", order=2),
+    dict(name="Tweezers", start=0, duration=time_1, group="Prep", label=f"MOT load for {MOT_loadtime} ms"),
+    dict(name="LAC", start=time_2, duration=(time_1-time_2), group="Control", label=f"t={LACs583_time} ms"),
     dict(name="ZS 401", start=time_1, duration=(time_3-time_1), group="Manipulation",
-        label=f"{sp_label}, {time_label}", order=3),
+        label=f"{sp_label}, {time_label}"),
     dict(name="411", start=time_1, duration=(time_3-time_1), group="Manipulation", 
          label=(f"P={PID411_SP} mW, "
                 "EOM ↯ (scanned); "
                 if flags['M2_EOM_freq'] == "scan"
-                else f"P={PID411_SP} mW, "), order=4),
+                else f"P={PID411_SP} mW, ")),
 ]
 
 
 if ImagingLight_wavelength == 1:
-    steps.append(dict(name="Imaging (401)", start=time_4, duration=(time_5-time_4), group="Readout", label="pulsed", order=6))
+    steps.append(dict(name="Imaging (401)", start=time_4, duration=(time_5-time_4), group="Readout", label="pulsed"))
 elif ImagingLight_wavelength == 2:
-    steps.append(dict(name="Imaging (583)", start=time_4, duration=(time_5-time_4), group="Readout", label="XX ms", order=6))
+    steps.append(dict(name="Imaging (583)", start=time_4, duration=(time_5-time_4), group="Readout", label="XX ms"))
 
 if OnOffTwduringRydbergTweezers == 0:
-    steps.append(dict(name="Tweezers", start=time_1, duration=(time_5-time_1), group="Prep", label="", order=1))
+    steps.append(dict(name="Tweezers", start=time_1, duration=(time_5-time_1), group="Prep", label=""))
 else:
-    steps.append(dict(name="Tweezers", start=time_3, duration=(time_5-time_3), group="Prep", label="Recapture", order=1))
+    steps.append(dict(name="Tweezers", start=time_3, duration=(time_5-time_3), group="Prep", label="Recapture"))
 
 if FieldIonize == 1:
-    steps.append(dict(name="HV", start=time_3, duration=(time_4-time_3), group="Optional", label=f"1400 Vpp, t={IonizationPulseDuration*1e3:.1f} µs", order=5))
+    steps.append(dict(name="HV", start=time_3, duration=(time_4-time_3), group="Optional", label=f"1400 Vpp, t={IonizationPulseDuration*1e3:.1f} µs"))
 
 # Colors
 colors = {
@@ -121,9 +118,6 @@ colors = {
     "Optional": "violet",
     "Readout": "lightgreen"
 }
-
-# Sorting by order value
-steps.sort(key=lambda s: s['order'])
 
 # Unique y-axis positions per step (allows reuse of same name with diff labels)
 y_labels = list(dict.fromkeys([step["name"] for step in steps]))
