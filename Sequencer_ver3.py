@@ -15,8 +15,8 @@ def flag_scanned_variables(df, var_list):
     return flags
 
 # Parameters (normally from your dataframe)
-meas_num = 5
-date = '2025-06-13'
+meas_num = 1
+date = '2025-05-25'
 
 # let's identify all unique times.
 time_1 = 15 #end of mot end LAC, begininning of loss
